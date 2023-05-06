@@ -1,5 +1,5 @@
 
-import os, shutil, enum
+import os, shutil, enum, copy
 
 def create_file(file_path, file_content):
     parent_path = '/'.join(file_path.split('/')[:-1])

@@ -51,9 +51,12 @@ def upload_file(file_local_path, target_absolute_path):
     # upload block_list
     upload_url = "https://d.pcs.baidu.com/rest/2.0/pcs/superfile2"
     payload = {}
-    files = [('file', open(file_local_path,'rb'))]
+    file_rb = open(file_local_path,'rb')
+    files = [('file', file_rb)]
     params = {"path": target_absolute_path, "uploadid": upload_id, "method": "upload", "type": "tmpfile", "partseq": 0}
     res = bdwp_request_with_token(upload_url, "POST", headers, params, payload, files)
+    file_rb.close()
+    
     if res["md5"] != "":
         logging.info("    blocklist-upload %s success" % file_local_path)
     file_cloud_md5 = res["md5"]

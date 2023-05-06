@@ -8,8 +8,6 @@ def upload_file(file_local_path:str, file_cloud_path:str, file_local_md5:str):
         logging.info("%s upload success" % file_local_path)
         return fs_id
     logging.error("%s upload failed" % file_local_path)
-    # error code != 0, skip this file
-    # cloud_md5 != local_md5, delete cloud, try again
 
 def download_file(local_base_path:str, cloud_base_path:str, middle_path:str):
     try:
@@ -20,14 +18,11 @@ def download_file(local_base_path:str, cloud_base_path:str, middle_path:str):
         baiduwangpan.download_file(dlink, local_base_path + middle_path)
     except Exception as err:
         raise Exception("Download file Failed: {}".format(err))
-    # todo: shoudl compare md5
 
 def download_file_by_fsid(local_base_path:str, middle_path:str, fs_id:str):
     res = baiduwangpan.get_file_meta(fs_id)
-    print(res, local_base_path, middle_path, fs_id)
     dlink = res['list'][0]['dlink']
     baiduwangpan.download_file(dlink, local_base_path + middle_path)
-    # todo: shoudl compare md5
 
 def is_file_exist_in_cloud(cloud_file_path:str):
     search_key = cloud_file_path.split('/')[-1]

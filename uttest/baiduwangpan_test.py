@@ -10,13 +10,6 @@ from support.encrypter import encrypter
 
 class SyncServiceTest(AbstractTestCase):
 
-    # file_1_middle_name = "file_1.txt"
-    # file_2_middle_name = "inner/file_2.txt"
-    # file_1_local_path = AbstractTestCase.local_unencrypt_path + file_1_middle_name
-    # file_2_local_path = AbstractTestCase.local_unencrypt_path + file_2_middle_name
-    # file_1_cloud_path = AbstractTestCase.cloud_unencryp_path + file_1_middle_name
-    # file_2_cloud_path = AbstractTestCase.cloud_unencryp_path + file_2_middle_name
-
     def test_baidu_wangpan_api(cls):
         test_file1_name = 'file_1.txt'
         test_file2_name = 'file_2.txt'
@@ -37,7 +30,6 @@ class SyncServiceTest(AbstractTestCase):
         md5, fs_id = baiduwangpan.upload_file(local_file1_absolute_path, cloud_file1_absolute_path)
         assert md5 == encrypter.get_md5(local_file1_absolute_path)
         assert fs_id != None
-        # assert 
         # create folder
         time.sleep(1)
         res = baiduwangpan.create_folder(cloud_test_folder_absolute_path)
@@ -82,4 +74,3 @@ class SyncServiceTest(AbstractTestCase):
         time.sleep(1)
         res = baiduwangpan.delete_file(cloud_test_folder_absolute_path)
         assert res["errno"] == 0
-

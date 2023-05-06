@@ -3,3 +3,5 @@
 config-local.yaml
 __pycache__/
 venv/
+uttest/testdata/
+local/

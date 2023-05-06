@@ -8,7 +8,7 @@ from support import filefolder, time_utils
 from support.encrypter import encrypter
 from support.config import config
 
-import time, json, os
+import time, json
 
 class SyncServiceTest(AbstractTestCase):
 
@@ -108,8 +108,6 @@ class SyncServiceTest(AbstractTestCase):
         filefolder.create_file(SyncServiceTest.file_1_local_path, AbstractTestCase.default_file_content)
         facade.loop_sync(AbstractTestCase.local_unencrypt_path, AbstractTestCase.cloud_unencryp_path, False)
         assert file_service.is_file_exist_in_cloud(SyncServiceTest.file_1_cloud_path) == True
-        local_db = get_filedb(AbstractTestCase.local_unencrypt_path)
-
         time.sleep(5)
         filefolder.create_file(AbstractTestCase.temp_path + SyncServiceTest.file_1_middle_name, AbstractTestCase.default_file_content + " cloud append.")
         fs_id = file_service.upload_file(AbstractTestCase.temp_path + SyncServiceTest.file_1_middle_name,SyncServiceTest.file_1_cloud_path, encrypter.get_md5(AbstractTestCase.temp_path + SyncServiceTest.file_1_middle_name))
@@ -141,18 +139,13 @@ class SyncServiceTest(AbstractTestCase):
         assert actual_content == AbstractTestCase.default_file_content + " cloud append."
         assert local_db.get_db_mtime(file_code) == cloud_modify_time
 
-
-
-
     def test_cloud_delete_file_unencrypt(self):
         # when
         file_code = encrypter.string_hash(SyncServiceTest.file_1_middle_name)
         filefolder.create_file(SyncServiceTest.file_1_local_path, AbstractTestCase.default_file_content)
         facade.loop_sync(AbstractTestCase.local_unencrypt_path, AbstractTestCase.cloud_unencryp_path, False)
         assert file_service.is_file_exist_in_cloud(SyncServiceTest.file_1_cloud_path) == True
-
         file_service.delete_file(SyncServiceTest.file_1_cloud_path)
-
         local_db = get_filedb(AbstractTestCase.local_unencrypt_path)
         cloud_modify_time = time_utils.get_timestample()
         filefolder.create_file(AbstractTestCase.temp_path + AbstractTestCase.testfolder_unencryp_db_name, json.dumps({
@@ -178,6 +171,3 @@ class SyncServiceTest(AbstractTestCase):
         assert filefolder.is_exist(SyncServiceTest.file_1_local_path) == False
         local_db = get_filedb(AbstractTestCase.local_unencrypt_path)
         assert local_db.get_delete(file_code) == True
-
-
-    

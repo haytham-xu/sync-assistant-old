@@ -7,7 +7,7 @@ from support.config import config
 from support.encrypter import encrypter
 from support.log import logging
 
-import os, copy, time
+import os, copy
 
 def loop_sync(local_base_path:str, cloud_base_path:str, encrypt:bool):
     folder_name = local_base_path.split('/')[-2]
@@ -19,8 +19,6 @@ def loop_sync(local_base_path:str, cloud_base_path:str, encrypt:bool):
     facade_support.init_swap_folder(swap_base_path)
     facade_support.precheck_local_db(local_db_path)
     facade_support.precheck_cloud_db(swap_base_path, cloud_base_path, db_name)
-    # local_db = FileDB(local_base_path)
-    # cloud_db = FileDB(swap_base_path)
     local_db = get_filedb(local_base_path)
     cloud_db = get_filedb(swap_base_path)
     duplicate_local_db = copy.copy(local_db.get_all())
@@ -33,8 +31,6 @@ def loop_sync(local_base_path:str, cloud_base_path:str, encrypt:bool):
                 err_msg = "Sync file failed: {}, with error message: {}".format(file_name, err)
                 logging.error(err_msg)
 
-    # print("local db", duplicate_local_db)
-    # print("cloud db", duplicate_cloud_db)
     for file_code in duplicate_local_db:
         # file already deleted, do nothing
         if local_db.get_delete(file_code):
@@ -47,7 +43,7 @@ def loop_sync(local_base_path:str, cloud_base_path:str, encrypt:bool):
         local_db.update_file_delete_status(file_code, True, delete_time)
         cloud_db.update_file_delete_status(file_code, True, delete_time)
         info_msg = "client delete, so remove cloud: %s" % cloud_path
-        print(info_msg)
+        # print(info_msg)
         logging.info(info_msg)
 
     for file_code in duplicate_cloud_db:
@@ -81,9 +77,7 @@ def local_file_execution(file_name:str, file_local_parent_path:str, local_base_p
     file_middle_path = file_local_path.removeprefix(local_base_path)
     file_cloud_path = cloud_base_path + file_middle_path
     file_local_md5 = encrypter.get_md5(file_local_path)
-    # print("-f1-> ", os.path.getmtime(file_local_path))
     os_mtime = int(os.path.getmtime(file_local_path))
-    # print("-f2-> ", os_mtime)
     db_mtime = time_utils.get_timestample()
     file_code = encrypter.string_hash(file_middle_path)
 
@@ -114,7 +108,7 @@ def local_file_execution(file_name:str, file_local_parent_path:str, local_base_p
         filefolder.remove_path(file_local_path)
         local_db.update_file_delete_status(file_code, cloud_db.get_delete(file_code), cloud_db.get_delete_time(file_code))
         info_msg = "Remote delete: {}".format(file_local_path)
-        print(info_msg)
+        # print(info_msg)
         logging.info(info_msg)
         return
     file_local_mtime = local_db.get_local_mtime(file_code)
@@ -122,16 +116,12 @@ def local_file_execution(file_name:str, file_local_parent_path:str, local_base_p
     if os_mtime < file_local_mtime:
         logging.error("error, mtime in db could not newer than os_mtimw for file %s" % file_local_path)
         return
-    # print("-f3-> ", os_mtime, file_local_mtime, os_mtime > file_local_mtime)
     # client modify, update local_mtime and local db_mtime
     if os_mtime > file_local_mtime:
         local_db.update_file_local_mtime(file_code, os_mtime)
         local_db.update_file_db_mtime(file_code, os_mtime)
-        # file_local_mtime = os_mtime
-        # db_mtime = os_mtime
     cloud_db_mtime = cloud_db.get_db_mtime(file_code)
     local_db_mtime = local_db.get_db_mtime(file_code)
-    # print("-f4-> ", local_db_mtime, cloud_db_mtime)
     # file not change
     if abs(cloud_db_mtime - local_db_mtime) <= config.get_time_gap():
         info_msg = "File not changed: {}".format(file_local_path)
@@ -142,21 +132,14 @@ def local_file_execution(file_name:str, file_local_parent_path:str, local_base_p
     if local_db_mtime > cloud_db_mtime:
         file_service.upload_file(file_local_path, file_cloud_path, file_local_md5)
         cloud_db.update_file_db_mtime(file_code, local_db_mtime)
-        # print(cloud_db.get_db_mtime(file_code), local_db.get_db_mtime(file_code))
-        # local_db.update_file_db_mtime(file_code, )
         info_msg = "Local modify:: {}".format(file_local_path)
         # print(info_msg)
         logging.info(info_msg)
         return
     # remote modify
     if cloud_db_mtime > local_db_mtime:
-        # def download_file(local_base_path:str, cloud_base_path:str, middle_path:str):
-        # file_service.download_file_by_fsid(cloud_db.get_local_base_path(file_code), cloud_db.get_middle_path(file_code), fs_id)
-        # file_service.download_file(file_cloud_path, file_local_parent_path)
-        # def download_file_by_fsid(local_base_path:str, middle_path:str, fs_id:str):
         file_service.download_file_by_fsid(cloud_db.get_local_base_path(file_code), cloud_db.get_middle_path(file_code), cloud_db.get_fs_id(file_code))
         local_db.update_file_db_mtime(file_code, cloud_db_mtime)
         info_msg = "Remote modify: {}".format(file_local_path)
         # print(info_msg)
         logging.info(info_msg)
-    # "encrypt_md5", "encrypt", "delete", "delete_time"

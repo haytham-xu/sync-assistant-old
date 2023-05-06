@@ -4,8 +4,6 @@ from support import filefolder
 from support.log import logging
 from support.filefolder import ReadMode
 
-# class DBCategory(enum.Enum)
-
 def get_filedb(folder_path:str):
     folder_name = folder_path.split('/')[-2]
     db_name = '.' + folder_name + '.json'
@@ -22,10 +20,6 @@ class FileDB():
     def get_by_code(self, file_code):
         return self.db[file_code]
     def save(self, file_code, fs_id, file_name, middle_path_and_file_name, local_base_path, cloud_base_path, file_local_md5, local_mtime, db_mtime, encrypt=False, encrypt_md5=None, delete=False, delete_time=None):
-        # if file_code not in self.db:
-        #     logging.info("store a new file: ", file_code)
-        # else:
-        #     logging.info("update a exitsing file: ", file_code)
         self.db[file_code] = {
             "fs_id": fs_id,
     		"file_name": file_name,
@@ -43,7 +37,6 @@ class FileDB():
         self.persistence()
             
     def update_file_delete_status(self, file_code, delete, delete_time):
-        # print("--> ", delete, delete_time)
         self.check_file_code(file_code)
         self.db[file_code]["delete"] = delete
         self.db[file_code]["delete_time"] = delete_time
